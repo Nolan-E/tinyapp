@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Nolan-E/tinyapp/issues"
   },
-  "homepage": "https://github.com/Nolan-E/tinyapp#readme"
+  "homepage": "https://github.com/Nolan-E/tinyapp#readme",
+  "devDependencies": {
+    "express": "^4.17.1"
+  }
 }
