@@ -1,4 +1,5 @@
 // IMPORT MODULES & SERVER SETUP
+const generateRandomString = require('./string-generator');
 const express = require('express');
 const app = express();
 const PORT = 8080;
@@ -30,7 +31,7 @@ app.get('/urls/new', (req, res) => {
 
 app.post('/urls', (req, res) => {
   console.log(req.body);
-  res.send('Ok');
+  res.send(generateRandomString());
 });
 
 app.get('/urls/:shortURL', (req, res) => {
