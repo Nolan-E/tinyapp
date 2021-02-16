@@ -32,13 +32,25 @@ app.get('/urls/new', (req, res) => {
 app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
   urlDatabase[shortURL] = req.body.longURL;
-  console.log(urlDatabase);
   res.redirect(`/urls/${shortURL}`);
+});
+
+app.get('/u/:shortURL', (req, res) => {
+  const longURL = urlDatabase[req.params.shortURL];
+  if (!longURL) {
+    res.status(404).send('404 Page Not Found');
+  } else {
+    res.redirect(longURL);
+  }
 });
 
 app.get('/urls/:shortURL', (req, res) => {
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
-  res.render('urls_show', templateVars);
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send('404 Page Not Found');
+  } else {
+    res.render('urls_show', templateVars);
+  }
 });
 
 app.get('/urls.json', (req, res) => {
@@ -48,7 +60,6 @@ app.get('/urls.json', (req, res) => {
 app.get('/hello', (req, res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
-
 
 // PORT LISTENER
 app.listen(PORT, () => {
