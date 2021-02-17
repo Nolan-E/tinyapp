@@ -28,6 +28,14 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
+app.get('/register', (req, res) => {
+  console.log(req.body)
+  console.log(req.cookies['username'])
+  // const username = req.body.username;
+  const templateVars = {  urls: urlDatabase, username: req.cookies['username'] };
+  res.render('urls_register', templateVars);
+});
+
 app.post('/login', (req, res) => {
   const username = req.body.username;
   res.cookie('username', username);
