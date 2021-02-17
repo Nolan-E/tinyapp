@@ -5,6 +5,8 @@ const app = express();
 const PORT = 8080;
 
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.set('view engine', 'ejs');
@@ -17,12 +19,18 @@ const urlDatabase = {
 
 // SERVER ROUTING
 app.get('/', (req, res) => {
-  res.send("Hello!");
+  res.redirect('/urls');
 });
 
 app.get('/urls', (req, res) => {
   const templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
+});
+
+app.post('/login', (req, res) => {
+  console.log(req.params)
+  console.log(req.body)
+  res.redirect('/urls');
 });
 
 app.get('/urls/new', (req, res) => {
@@ -65,6 +73,7 @@ app.get('/urls/:shortURL', (req, res) => {
   }
 });
 
+// TEST ROUTES
 app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
