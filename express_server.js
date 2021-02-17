@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
@@ -28,8 +29,8 @@ app.get('/urls', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  console.log(req.params)
-  console.log(req.body)
+  const username = req.body.username;
+  res.cookie('username', username);
   res.redirect('/urls');
 });
 
