@@ -91,7 +91,11 @@ app.post('/logout', (req, res) => {
 app.get('/urls/new', (req, res) => {
   const currentUser = users[req.cookies.user_id];
   const templateVars = { currentUser: currentUser };
-  res.render('urls_new', templateVars);
+  if (!currentUser) {
+    res.redirect('/register');
+  } else {
+    res.render('urls_new', templateVars);
+  }
 });
 
 app.post('/urls', (req, res) => {
