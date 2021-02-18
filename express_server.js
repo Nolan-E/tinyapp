@@ -3,6 +3,7 @@ const generateRandomString = require('./string-generator');
 const emailChecker = require('./email-checker');
 const dbCheck = require('./database-checker');
 
+const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 
@@ -26,7 +27,7 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: bcrypt.hashSync("asdf123", 10)
   },
   "user2RandomID": {
     id: "user2RandomID",
@@ -65,7 +66,13 @@ app.post('/register', (req, res) => {
     res.status(400).send('400 Bad Request');
   } else {
     const rId = generateRandomString();
-    users[rId] = { id: rId, email: req.body.email, password: req.body.password };
+
+    users[rId] = {
+      id: rId,
+      email: req.body.email,
+      password: bcrypt.hashSync(req.body.password, 10)
+    };
+
     res.cookie('user_id', users[rId].id);
     res.redirect('/urls');
   }
@@ -81,11 +88,13 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
+  const hashPass = bcrypt.hashSync(password, 10);
   const userRndID = emailChecker(email, users);
+
   if (!emailChecker(email, users)) {
     res.status(403).send('403 Forbidden');
   } else {
-    if (password !== users[userRndID].password) {
+    if (!bcrypt.compareSync(password, hashPass)) {
       res.status(403).send('403 Forbidden');
     } else {
       res.cookie('user_id', userRndID);
