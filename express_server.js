@@ -1,6 +1,7 @@
 // IMPORT MODULES & SERVER SETUP
 const generateRandomString = require('./string-generator');
 const emailChecker = require('./email-checker');
+const dbCheck = require('./database-checker');
 const express = require('express');
 const app = express();
 const PORT = 8080;
@@ -16,9 +17,14 @@ app.set('view engine', 'ejs');
 
 // IMITATION DATABASE OBJECTS
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID" }
 };
+// OLD Database
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 
 const users = {
   "userRandomID": {
@@ -40,8 +46,13 @@ app.get('/', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const currentUser = users[req.cookies.user_id];
-  const templateVars = { urls: urlDatabase, currentUser: currentUser };
-  res.render('urls_index', templateVars);
+  const cUserShort = dbCheck(req.cookies.user_id, urlDatabase);
+  const templateVars = { urls: cUserShort, currentUser: currentUser };
+  if (!currentUser) {
+    res.redirect('/login');
+  } else {
+    res.render('urls_index', templateVars);
+  }
 });
 
 app.get('/register', (req, res) => {
@@ -100,7 +111,7 @@ app.get('/urls/new', (req, res) => {
 
 app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
+  urlDatabase[shortURL] = { longURL:req.body.longURL, userID: req.cookies.user_id };
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -112,12 +123,13 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 app.post('/urls/:shortURL/update', (req, res) => {
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL] = req.body.editLongURL;
+  urlDatabase[shortURL].longURL = req.body.editLongURL;
   res.redirect(`/urls/${shortURL}`);
 });
 
+// Redirect Current User to LongURL via Shortened URL
 app.get('/u/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL];
+  const longURL = urlDatabase[req.params.shortURL].longURL;
   if (!longURL) {
     res.status(404).send('404 Page Not Found');
   } else {
@@ -125,9 +137,10 @@ app.get('/u/:shortURL', (req, res) => {
   }
 });
 
+// Renders Edit Page for Shortened URL
 app.get('/urls/:shortURL', (req, res) => {
   const currentUser = users[req.cookies.user_id];
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], currentUser: currentUser };
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, currentUser: currentUser };
   if (!urlDatabase[req.params.shortURL]) {
     res.status(404).send('404 Page Not Found');
   } else {
