@@ -1,14 +1,8 @@
-// IMPORT MODULES & SERVER SETUP
-const generateRandomString = require('./string-generator');
-const emailChecker = require('./email-checker');
-const dbCheck = require('./database-checker');
-
+// IMPORT MODULES/HELPERS & SERVER SETUP
+const { dbCheck, emailChecker, generateRandomString }  = require('./helpers');
 const bcrypt = require('bcryptjs');
 const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
-// const cookieParser = require('cookie-parser');
-
-
 const express = require('express');
 const app = express();
 const PORT = 8080;
@@ -19,7 +13,6 @@ app.use(cookieSession({
   name: 'session',
   keys: ['kame', 'house']
 }));
-// app.use(cookieParser());
 
 app.set('view engine', 'ejs');
 
