@@ -61,12 +61,32 @@ app.post('/register', (req, res) => {
   }
 });
 
-app.post('/login', (req, res) => {
+app.get('/login', (req, res) => {
   const currentUser = users[req.cookies.user_id]
-  const username = req.body.username;
-  res.cookie('username', username);
-  res.redirect('/urls');
+  const templateVars = { urls: urlDatabase, currentUser: currentUser };
+  res.render('urls_login', templateVars);
 });
+
+app.post('/login', (req, res) => {
+  // const currentUser = users[req.cookies.user_id]
+  const email = req.body.email;
+  const password = req.body.password;
+  // if (!req.body.email || !req.body.password || emailChecker(req.body.email, users)) {
+  //   res.status(400).send('400 Bad Request');
+  // } else {
+    const rId = generateRandomString();
+    users[rId] = { id: rId, email: req.body.email, password: req.body.password };
+    res.cookie('user_id', users[rId].id);
+    res.redirect('/urls');
+  // }
+});
+
+// app.post('/login', (req, res) => {
+  // const currentUser = users[req.cookies.user_id]
+//   const username = req.body.username;
+//   res.cookie('username', username);
+//   res.redirect('/urls');
+// });
 
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
