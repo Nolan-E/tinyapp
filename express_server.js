@@ -92,7 +92,7 @@ app.get('/urls/new', (req, res) => {
   const currentUser = users[req.cookies.user_id];
   const templateVars = { currentUser: currentUser };
   if (!currentUser) {
-    res.redirect('/register');
+    res.redirect('/login');
   } else {
     res.render('urls_new', templateVars);
   }
