@@ -1,5 +1,6 @@
 // IMPORT MODULES & SERVER SETUP
 const generateRandomString = require('./string-generator');
+const emailChecker = require('./email-checker');
 const express = require('express');
 const app = express();
 const PORT = 8080;
@@ -50,10 +51,14 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-  const rId = generateRandomString();
-  users[rId] = { id: rId, email: req.body.email, password: req.body.password };
-  res.cookie('user_id', users[rId].id);
-  res.redirect('/urls');
+  if (!req.body.email || !req.body.password || emailChecker(req.body.email, users)) {
+    res.status(400).send('400 Bad Request');
+  } else {
+    const rId = generateRandomString();
+    users[rId] = { id: rId, email: req.body.email, password: req.body.password };
+    res.cookie('user_id', users[rId].id);
+    res.redirect('/urls');
+  }
 });
 
 app.post('/login', (req, res) => {
