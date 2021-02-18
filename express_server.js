@@ -2,12 +2,13 @@
 const generateRandomString = require('./string-generator');
 const emailChecker = require('./email-checker');
 const dbCheck = require('./database-checker');
-const express = require('express');
-const app = express();
-const PORT = 8080;
 
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+
+const express = require('express');
+const app = express();
+const PORT = 8080;
 
 // MIDDLEWARE
 app.use(bodyParser.urlencoded({extended: true}));
@@ -20,11 +21,6 @@ const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
   "9sm5xK": { longURL: "http://www.google.com", userID: "userRandomID" }
 };
-// OLD Database
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
 
 const users = {
   "userRandomID": {
@@ -40,10 +36,12 @@ const users = {
 };
 
 // SERVER ROUTING
+// Root GET
 app.get('/', (req, res) => {
   res.redirect('/urls');
 });
 
+// MyURLS page GET
 app.get('/urls', (req, res) => {
   const currentUser = users[req.cookies.user_id];
   const cUserShort = dbCheck(req.cookies.user_id, urlDatabase);
@@ -55,6 +53,7 @@ app.get('/urls', (req, res) => {
   }
 });
 
+// Register page GET & POST
 app.get('/register', (req, res) => {
   const currentUser = users[req.cookies.user_id];
   const templateVars = { urls: urlDatabase, currentUser: currentUser };
@@ -72,6 +71,7 @@ app.post('/register', (req, res) => {
   }
 });
 
+// Login page GET & POST
 app.get('/login', (req, res) => {
   const currentUser = users[req.cookies.user_id];
   const templateVars = { urls: urlDatabase, currentUser: currentUser };
@@ -94,11 +94,13 @@ app.post('/login', (req, res) => {
   }
 });
 
+// Logout POST
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
+// Create new URL GET & POST
 app.get('/urls/new', (req, res) => {
   const currentUser = users[req.cookies.user_id];
   const templateVars = { currentUser: currentUser };
@@ -115,16 +117,38 @@ app.post('/urls', (req, res) => {
   res.redirect(`/urls/${shortURL}`);
 });
 
+// Delete database entry
 app.post('/urls/:shortURL/delete', (req, res) => {
   const shortURL = req.params.shortURL;
-  delete urlDatabase[shortURL];
-  res.redirect('/urls');
+  if (urlDatabase[shortURL].userID === req.cookies.user_id) {
+    delete urlDatabase[shortURL];
+    res.redirect('/urls');
+  } else {
+    res.status(403).send('403 Forbidden');
+  }
+});
+
+// Renders Edit Page GET & Edit POST
+app.get('/urls/:shortURL', (req, res) => {
+  const currentUser = users[req.cookies.user_id];
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, currentUser: currentUser };
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(404).send('404 Page Not Found');
+  } else if (urlDatabase[req.params.shortURL].userID === req.cookies.user_id) {
+    res.render('urls_show', templateVars);
+  } else {
+    res.status(403).send('403 Forbidden');
+  }
 });
 
 app.post('/urls/:shortURL/update', (req, res) => {
   const shortURL = req.params.shortURL;
-  urlDatabase[shortURL].longURL = req.body.editLongURL;
-  res.redirect(`/urls/${shortURL}`);
+  if (urlDatabase[shortURL].userID === req.cookies.user_id) {
+    urlDatabase[shortURL].longURL = req.body.editLongURL;
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    res.status(403).send('403 Forbidden');
+  }
 });
 
 // Redirect Current User to LongURL via Shortened URL
@@ -134,17 +158,6 @@ app.get('/u/:shortURL', (req, res) => {
     res.status(404).send('404 Page Not Found');
   } else {
     res.redirect(longURL);
-  }
-});
-
-// Renders Edit Page for Shortened URL
-app.get('/urls/:shortURL', (req, res) => {
-  const currentUser = users[req.cookies.user_id];
-  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, currentUser: currentUser };
-  if (!urlDatabase[req.params.shortURL]) {
-    res.status(404).send('404 Page Not Found');
-  } else {
-    res.render('urls_show', templateVars);
   }
 });
 
