@@ -2,7 +2,7 @@
 const emailChecker = (chkEmail, users) => {
   for (const u in users) {
     if (users[u].email === chkEmail) {
-      return true
+      return users[u].id;
     }
   }
   

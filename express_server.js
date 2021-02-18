@@ -39,13 +39,13 @@ app.get('/', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const currentUser = users[req.cookies.user_id]
+  const currentUser = users[req.cookies.user_id];
   const templateVars = { urls: urlDatabase, currentUser: currentUser };
   res.render('urls_index', templateVars);
 });
 
 app.get('/register', (req, res) => {
-  const currentUser = users[req.cookies.user_id]
+  const currentUser = users[req.cookies.user_id];
   const templateVars = { urls: urlDatabase, currentUser: currentUser };
   res.render('urls_register', templateVars);
 });
@@ -62,31 +62,26 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  const currentUser = users[req.cookies.user_id]
+  const currentUser = users[req.cookies.user_id];
   const templateVars = { urls: urlDatabase, currentUser: currentUser };
   res.render('urls_login', templateVars);
 });
 
 app.post('/login', (req, res) => {
-  // const currentUser = users[req.cookies.user_id]
   const email = req.body.email;
   const password = req.body.password;
-  // if (!req.body.email || !req.body.password || emailChecker(req.body.email, users)) {
-  //   res.status(400).send('400 Bad Request');
-  // } else {
-    const rId = generateRandomString();
-    users[rId] = { id: rId, email: req.body.email, password: req.body.password };
-    res.cookie('user_id', users[rId].id);
-    res.redirect('/urls');
-  // }
+  const userRndID = emailChecker(email, users);
+  if (!emailChecker(email, users)) {
+    res.status(403).send('403 Forbidden');
+  } else {
+    if (password !== users[userRndID].password) {
+      res.status(403).send('403 Forbidden');
+    } else {
+      res.cookie('user_id', userRndID);
+      res.redirect('/urls');
+    }
+  }
 });
-
-// app.post('/login', (req, res) => {
-  // const currentUser = users[req.cookies.user_id]
-//   const username = req.body.username;
-//   res.cookie('username', username);
-//   res.redirect('/urls');
-// });
 
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
@@ -94,7 +89,7 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  const currentUser = users[req.cookies.user_id]
+  const currentUser = users[req.cookies.user_id];
   const templateVars = { currentUser: currentUser };
   res.render('urls_new', templateVars);
 });
@@ -127,7 +122,7 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 app.get('/urls/:shortURL', (req, res) => {
-  const currentUser = users[req.cookies.user_id]
+  const currentUser = users[req.cookies.user_id];
   const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL], currentUser: currentUser };
   if (!urlDatabase[req.params.shortURL]) {
     res.status(404).send('404 Page Not Found');
