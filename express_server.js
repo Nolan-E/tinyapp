@@ -67,18 +67,16 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   if (!req.body.email || !req.body.password || emailChecker(req.body.email, users)) {
     res.status(400).send('400 Bad Request');
-  } else {
-    const rId = generateRandomString();
-
-    users[rId] = {
-      id: rId,
-      email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, 10)
-    };
-
-    req.session.user_id = users[rId].id;
-    res.redirect('/urls');
+    return;
   }
+  const rId = generateRandomString();
+  users[rId] = {
+    id: rId,
+    email: req.body.email,
+    password: bcrypt.hashSync(req.body.password, 10)
+  };
+  req.session.user_id = users[rId].id;
+  res.redirect('/urls');
 });
 
 // Login page GET & POST
@@ -101,7 +99,6 @@ app.post('/login', (req, res) => {
   const userRndID = emailChecker(email, users);
   const password = req.body.password;
   const hashPass = users[userRndID].password;
-
   if (!bcrypt.compareSync(password, hashPass)) {
     res.status(403).send('403 Forbidden');
     return;
@@ -122,9 +119,9 @@ app.get('/urls/new', (req, res) => {
   const templateVars = { currentUser: currentUser };
   if (!currentUser) {
     res.redirect('/login');
-  } else {
-    res.render('urls_new', templateVars);
+    return;
   }
+  res.render('urls_new', templateVars);
 });
 
 app.post('/urls', (req, res) => {
@@ -152,13 +149,15 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
     res.status(404).send('404 Page Not Found');
-  } else if (urlDatabase[req.params.shortURL].userID === req.session.user_id) {
-    const currentUser = users[req.session.user_id];
-    const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, currentUser: currentUser };
-    res.render('urls_show', templateVars);
-  } else {
-    res.status(403).send('403 Forbidden');
+    return;
   }
+  if (urlDatabase[req.params.shortURL].userID !== req.session.user_id) {
+    res.status(403).send('403 Forbidden');
+    return;
+  }
+  const currentUser = users[req.session.user_id];
+  const templateVars = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL].longURL, currentUser: currentUser };
+  res.render('urls_show', templateVars);
 });
 
 app.post('/urls/:shortURL/update', (req, res) => {
