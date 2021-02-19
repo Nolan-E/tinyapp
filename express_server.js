@@ -48,7 +48,6 @@ app.get('/urls', (req, res) => {
   const templateVars = { urls: cUserShort, currentUser: currentUser };
   if (!currentUser) {
     res.redirect('/login');
-    // res.status(400).send('Please login to continue');
     return;
   }
   res.render('urls_index', templateVars);
@@ -180,6 +179,16 @@ app.get('/u/:shortURL', (req, res) => {
   }
   const longURL = urlDatabase[req.params.shortURL].longURL;
   res.redirect(longURL);
+});
+
+// Redirect non-useful GET routes to login
+app.get('*', (req, res) => {
+  res.redirect('/login');
+});
+
+// Redirect non-useful GET routes to login
+app.post('*', (req, res) => {
+  res.status(400).redirect('/login');
 });
 
 // PORT LISTENER
