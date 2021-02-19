@@ -8,7 +8,7 @@ Install all dependencies:
 ```shell
 npm install
 ```
-#### ***If you have issues installing `bcryptjs`, refer to [npm Install Issues](#npm-Install-Issues)***
+***If you have issues installing `bcryptjs`, refer to [npm Install Issues](#npm-Install-Issues)***
 <br>
 Run the development web server:
 
@@ -39,13 +39,15 @@ Added the following additional routes:
     res.status(400).redirect('/login');
   });
   ```
+- Unit testing done for all helper functions. Test suite can be found in the [test](/test) directory.
+
 
 ## Dependencies
 
 - Node.js
 - Express
 - EJS
-- bcrypt
+- bcryptjs
 - body-parser
 - cookie-session
 
@@ -71,4 +73,4 @@ const bcrypt = require('bcrypt');
 - Add Analytics & Method Override "stretch" features.
 
 ## References & Acknowledgements
-This project was developed by @Nolan-E in tandem with @Just-Hosam as an ever valuable second set of eyes for debugging and a sounding board for reasoning through problems.
+This project was developed by [Nolan-E](https://github.com/Nolan-E) in tandem with [Just-Hosam](https://github.com/Just-Hosam) as an ever valuable second set of eyes for debugging and a sounding board for reasoning through problems.
